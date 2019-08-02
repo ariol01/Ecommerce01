@@ -1,131 +1,123 @@
 ﻿using EcommerceMod1.Models;
-using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using EcommerceMod1.Classes_Genericas;
 
 namespace EcommerceMod1.Controllers
 {
-    public class DepartamentsController : Controller
+    public class CitiesController : Controller
     {
         private EcommerceContext db = new EcommerceContext();
 
-        // GET: Departaments
+        // GET: Cities
         public ActionResult Index()
         {
-            return View(db.Departaments.ToList());
+            var cities = db.Cities.Include(c => c.Departaments);
+            return View(cities.ToList());
         }
 
-        // GET: Departaments/Details/5
+        // GET: Cities/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Departaments departaments = db.Departaments.Find(id);
-            if (departaments == null)
+            City city = db.Cities.Find(id);
+            if (city == null)
             {
                 return HttpNotFound();
             }
-            return View(departaments);
+            return View(city);
         }
 
-        // GET: Departaments/Create
+        // GET: Cities/Create
         public ActionResult Create()
         {
+           
+            ViewBag.DepartamentsId = new SelectList(CombosHelper.GetDepartaments(), "DepartamentsId", "Name");
             return View();
         }
 
-        // POST: Departaments/Create
+        // POST: Cities/Create
         // Para se proteger de mais ataques, ative as propriedades específicas a que você quer se conectar. Para 
         // obter mais detalhes, consulte https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "DepartamentsId,Name")] Departaments departaments)
+        public ActionResult Create([Bind(Include = "CityId,Name,DepartamentsId")] City city)
         {
             if (ModelState.IsValid)
             {
-                db.Departaments.Add(departaments);
+                db.Cities.Add(city);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
-            return View(departaments);
+            
+            ViewBag.DepartamentsId = new SelectList(CombosHelper.GetDepartaments(), "DepartamentsId", "Name", city.DepartamentsId);
+            return View(city);
         }
 
-        // GET: Departaments/Edit/5
+        // GET: Cities/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Departaments departaments = db.Departaments.Find(id);
-            if (departaments == null)
+            City city = db.Cities.Find(id);
+            if (city == null)
             {
                 return HttpNotFound();
             }
-            return View(departaments);
+
+            ViewBag.DepartamentsId = new SelectList(CombosHelper.GetDepartaments(), "DepartamentsId", "Name", city.DepartamentsId);
+            return View(city);
         }
 
-        // POST: Departaments/Edit/5
+        // POST: Cities/Edit/5
         // Para se proteger de mais ataques, ative as propriedades específicas a que você quer se conectar. Para 
         // obter mais detalhes, consulte https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "DepartamentsId,Name")] Departaments departaments)
+        public ActionResult Edit([Bind(Include = "CityId,Name,DepartamentsId")] City city)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(departaments).State = EntityState.Modified;
+                db.Entry(city).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(departaments);
+
+            ViewBag.DepartamentsId = new SelectList(CombosHelper.GetDepartaments(), "DepartamentsId", "Name", city.DepartamentsId);
+            return View(city);
         }
 
-        // GET: Departaments/Delete/5
+        // GET: Cities/Delete/5
         public ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Departaments departaments = db.Departaments.Find(id);
-            if (departaments == null)
+            City city = db.Cities.Find(id);
+            if (city == null)
             {
                 return HttpNotFound();
             }
-            return View(departaments);
+            return View(city);
         }
 
-        // POST: Departaments/Delete/5
+        // POST: Cities/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Departaments departaments = db.Departaments.Find(id);
-            db.Departaments.Remove(departaments);
-            try
-            {
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                if (ex.InnerException != null && ex.InnerException.InnerException != null && ex.InnerException.Message.Contains("updating the entries"))
-                {
-                    ModelState.AddModelError(string.Empty, "Não é possível excluir departamento , quando tem cidades relacionadas a ele, por favor apague as primeiros e volte a tentar.");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, ex.Message);
-                }
-                return View(departaments);
-               
-            }
+            City city = db.Cities.Find(id);
+            db.Cities.Remove(city);
+            db.SaveChanges();
+            return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)
